@@ -33,6 +33,8 @@ import { dragAndDropManager } from '../lib/drag-and-drop-manager'
 import { DragType } from '../models/drag-drop'
 import { MultiCommitOperationKind } from '../models/multi-commit-operation'
 import { clamp } from '../lib/clamp'
+import { ActionsSidebar } from './history/actions'
+import { SelectedActions } from './history/selected-actions'
 
 interface IRepositoryViewProps {
   readonly repository: Repository
@@ -103,6 +105,7 @@ interface IRepositoryViewState {
 const enum Tab {
   Changes = 0,
   History = 1,
+  Actions = 2,
 }
 
 export class RepositoryView extends React.Component<
@@ -153,10 +156,7 @@ export class RepositoryView extends React.Component<
   }
 
   private renderTabs(): JSX.Element {
-    const selectedTab =
-      this.props.state.selectedSection === RepositorySectionTab.Changes
-        ? Tab.Changes
-        : Tab.History
+    const selectedTab = this.props.state.selectedSection as number as Tab
 
     return (
       <TabBar selectedIndex={selectedTab} onTabClicked={this.onTabClicked}>
@@ -167,6 +167,10 @@ export class RepositoryView extends React.Component<
 
         <div className="with-indicator">
           <span>History</span>
+        </div>
+
+        <div className="with-indicator">
+          <span>Actions</span>
         </div>
       </TabBar>
     )
@@ -288,6 +292,55 @@ export class RepositoryView extends React.Component<
     )
   }
 
+  private renderActionsSidebar(): JSX.Element {
+    const { repository, dispatcher, state, aheadBehindStore, emoji } =
+      this.props
+    const {
+      remote,
+      compareState,
+      branchesState,
+      commitSelection: { shas },
+      commitLookup,
+      localCommitSHAs,
+      localTags,
+      tagsToPush,
+      multiCommitOperationState: mcos,
+    } = state
+    const { tip } = branchesState
+    const currentBranch = tip.kind === TipState.Valid ? tip.branch : null
+    const isCherryPickInProgress =
+      mcos !== null &&
+      mcos.operationDetail.kind === MultiCommitOperationKind.CherryPick
+
+    const scrollTop =
+      this.forceCompareListScrollTop ||
+      this.previousSection === RepositorySectionTab.Changes
+        ? this.state.compareListScrollTop
+        : undefined
+    this.previousSection = RepositorySectionTab.History
+    this.forceCompareListScrollTop = false
+
+    return (
+      <ActionsSidebar
+        repository={repository}
+        isLocalRepository={remote === null}
+        compareState={compareState}
+        selectedCommitShas={shas}
+        shasToHighlight={compareState.shasToHighlight}
+        currentBranch={currentBranch}
+        emoji={emoji}
+        commitLookup={commitLookup}
+        localCommitSHAs={localCommitSHAs}
+        localTags={localTags}
+        dispatcher={dispatcher}
+        compareListScrollTop={scrollTop}
+        tagsToPush={tagsToPush}
+        aheadBehindStore={aheadBehindStore}
+        isCherryPickInProgress={isCherryPickInProgress}
+      />
+    )
+  }
+
   private renderSidebarContents(): JSX.Element {
     const selectedSection = this.props.state.selectedSection
 
@@ -295,6 +348,8 @@ export class RepositoryView extends React.Component<
       return this.renderChangesSidebar()
     } else if (selectedSection === RepositorySectionTab.History) {
       return this.renderCompareSidebar()
+    } else if (selectedSection === RepositorySectionTab.Actions) {
+      return this.renderActionsSidebar()
     } else {
       return assertNever(selectedSection, 'Unknown repository section')
     }
@@ -506,6 +561,52 @@ export class RepositoryView extends React.Component<
     }
   }
 
+  private renderContentForActions(): JSX.Element {
+    const { commitSelection, commitLookup, localCommitSHAs } = this.props.state
+    const { changesetData, file, diff, shas, shasInDiff, isContiguous } =
+      commitSelection
+
+    const selectedCommits = []
+    for (const sha of shas) {
+      const commit = commitLookup.get(sha)
+      if (commit !== undefined) {
+        selectedCommits.push(commit)
+      }
+    }
+
+    const showDragOverlay = dragAndDropManager.isDragOfTypeInProgress(
+      DragType.Commit
+    )
+
+    return (
+      <SelectedActions
+        repository={this.props.repository}
+        isLocalRepository={this.props.state.remote === null}
+        dispatcher={this.props.dispatcher}
+        selectedCommits={selectedCommits}
+        shasInDiff={shasInDiff}
+        isContiguous={isContiguous}
+        localCommitSHAs={localCommitSHAs}
+        changesetData={changesetData}
+        selectedFile={file}
+        currentDiff={diff}
+        emoji={this.props.emoji}
+        commitSummaryWidth={this.props.commitSummaryWidth}
+        selectedDiffType={this.props.imageDiffType}
+        externalEditorLabel={this.props.externalEditorLabel}
+        onOpenInExternalEditor={this.props.onOpenInExternalEditor}
+        onViewCommitOnGitHub={this.props.onViewCommitOnGitHub}
+        hideWhitespaceInDiff={this.props.hideWhitespaceInHistoryDiff}
+        showSideBySideDiff={this.props.showSideBySideDiff}
+        onOpenBinaryFile={this.onOpenBinaryFile}
+        onOpenSubmodule={this.onOpenSubmodule}
+        onChangeImageDiffType={this.onChangeImageDiffType}
+        onDiffOptionsOpened={this.onDiffOptionsOpened}
+        showDragOverlay={showDragOverlay}
+      />
+    )
+  }
+
   private onOpenBinaryFile = (fullPath: string) => {
     openFile(fullPath, this.props.dispatcher)
   }
@@ -525,6 +626,8 @@ export class RepositoryView extends React.Component<
       return this.renderContentForChanges()
     } else if (selectedSection === RepositorySectionTab.History) {
       return this.renderContentForHistory()
+    } else if (selectedSection === RepositorySectionTab.Actions) {
+      return this.renderContentForActions()
     } else {
       return assertNever(selectedSection, 'Unknown repository section')
     }
@@ -579,10 +682,9 @@ export class RepositoryView extends React.Component<
   }
 
   private changeTab() {
-    const section =
-      this.props.state.selectedSection === RepositorySectionTab.History
-        ? RepositorySectionTab.Changes
-        : RepositorySectionTab.History
+    // get the next tab
+    const selectedSection = this.props.state.selectedSection + 1
+    const section = (selectedSection % 3) as RepositorySectionTab
 
     this.props.dispatcher.changeRepositorySection(
       this.props.repository,
@@ -591,10 +693,7 @@ export class RepositoryView extends React.Component<
   }
 
   private onTabClicked = (tab: Tab) => {
-    const section =
-      tab === Tab.History
-        ? RepositorySectionTab.History
-        : RepositorySectionTab.Changes
+    const section = tab as number as RepositorySectionTab
 
     this.props.dispatcher.changeRepositorySection(
       this.props.repository,

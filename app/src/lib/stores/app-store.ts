@@ -3220,6 +3220,8 @@ export class AppStore extends TypedBaseStore<IAppState> {
         includingStatus: false,
         clearPartialState: false,
       })
+    } else if (section === RepositorySectionTab.Actions) {
+      refreshSectionPromise = this.refreshActionsSection(repository)
     } else {
       return assertNever(section, `Unknown section: ${section}`)
     }
@@ -3451,6 +3453,21 @@ export class AppStore extends TypedBaseStore<IAppState> {
    * This will be called automatically when appropriate.
    */
   private async refreshHistorySection(repository: Repository): Promise<void> {
+    const gitStore = this.gitStoreCache.get(repository)
+    const state = this.repositoryStateCache.get(repository)
+    const tip = state.branchesState.tip
+
+    if (tip.kind === TipState.Valid) {
+      await gitStore.loadLocalCommits(tip.branch)
+    }
+
+    return this.updateOrSelectFirstCommit(
+      repository,
+      state.compareState.commitSHAs
+    )
+  }
+
+  private async refreshActionsSection(repository: Repository): Promise<void> {
     const gitStore = this.gitStoreCache.get(repository)
     const state = this.repositoryStateCache.get(repository)
     const tip = state.branchesState.tip

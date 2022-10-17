@@ -351,8 +351,9 @@ export type Foldout =
   | AppMenuFoldout
 
 export enum RepositorySectionTab {
-  Changes,
-  History,
+  Changes = 0,
+  History = 1,
+  Actions = 2,
 }
 
 /**
