@@ -304,6 +304,7 @@ import { offsetFromNow } from '../offset-from'
 import { findContributionTargetDefaultBranch } from '../branch'
 import { ValidNotificationPullRequestReview } from '../valid-notification-pull-request-review'
 import { determineMergeability } from '../git/merge-tree'
+import { WorkflowState } from '../../models/workflow-data'
 
 const LastSelectedRepositoryIDKey = 'last-selected-repository-id'
 
@@ -1123,6 +1124,16 @@ export class AppStore extends TypedBaseStore<IAppState> {
 
   private clearSelectedCommit(repository: Repository) {
     this.repositoryStateCache.updateCommitSelection(repository, () => ({
+      commitWorkflow: {
+        name: '',
+        path: '',
+        state: WorkflowState.None,
+        createAt: '',
+        updateAt: '',
+        url: '',
+        htmlUrl: '',
+        badgeUrl: '',
+      },
       shas: [],
       file: null,
       changesetData: { files: [], linesAdded: 0, linesDeleted: 0 },
@@ -1153,6 +1164,16 @@ export class AppStore extends TypedBaseStore<IAppState> {
     }
 
     this.repositoryStateCache.updateCommitSelection(repository, () => ({
+      commitWorkflow: {
+        name: '',
+        path: '',
+        state: WorkflowState.None,
+        createAt: '',
+        updateAt: '',
+        url: '',
+        htmlUrl: '',
+        badgeUrl: '',
+      },
       shas,
       shasInDiff,
       isContiguous,
@@ -7300,6 +7321,16 @@ export class AppStore extends TypedBaseStore<IAppState> {
       baseBranch,
       commitSHAs,
       commitSelection: {
+        commitWorkflow: {
+          name: '',
+          path: '',
+          state: WorkflowState.None,
+          createAt: '',
+          updateAt: '',
+          url: '',
+          htmlUrl: '',
+          badgeUrl: '',
+        },
         shas: commitSHAs,
         shasInDiff: commitSHAs,
         isContiguous: true,

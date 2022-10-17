@@ -237,6 +237,7 @@ export class SelectedActions extends React.Component<
   }
 
   private renderFileList() {
+    // TODO
     const files = this.props.changesetData.files
     if (files.length === 0) {
       return <div className="fill-window">No files in commit</div>
