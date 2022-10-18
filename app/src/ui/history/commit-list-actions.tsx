@@ -1,3 +1,4 @@
+/* eslint-disable react-readonly-props-and-state */
 import * as React from 'react'
 import memoize from 'memoize-one'
 import { GitHubRepository } from '../../models/github-repository'
@@ -7,12 +8,15 @@ import { arrayEquals } from '../../lib/equality'
 import { DragData } from '../../models/drag-drop'
 import classNames from 'classnames'
 import { CommitListItemActions } from './commit-list-item-actions'
+import { Account } from '../../models/account'
+import { API } from '../../lib/api'
 
 const RowHeight = 50
 
 interface ICommitListActionProps {
   /** The GitHub repository associated with this commit (if found) */
   readonly gitHubRepository: GitHubRepository | null
+  readonly accounts: Account[]
 
   /** The list of commits SHAs to display, in order. */
   readonly commitSHAs: ReadonlyArray<string>
@@ -93,7 +97,7 @@ export class CommitListAction extends React.Component<
 
   private renderCommit = (row: number) => {
     const sha = this.props.commitSHAs[row]
-    const commit = this.props.commitLookup.get(sha)
+    const commit: Commit | undefined = this.props.commitLookup.get(sha)
 
     if (commit == null) {
       if (__DEV__) {
@@ -269,6 +273,13 @@ export class CommitListAction extends React.Component<
         shasToHighlight !== undefined && shasToHighlight.length > 0,
     })
 
+    const account = this.props.accounts[0]
+    const api = new API(account.endpoint, account.token)
+    const result = api.fetchWorkflow(
+      this.props.gitHubRepository?.owner?.login ?? '',
+      this.props.gitHubRepository?.name ?? ''
+    )
+    console.log(result)
     return (
       <div id="commit-list" className={classes}>
         <List

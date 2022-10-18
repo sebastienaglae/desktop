@@ -25,8 +25,6 @@ import { DefaultCommitMessage } from '../../models/commit-message'
 import { sendNonFatalException } from '../helpers/non-fatal-exception'
 import { StatsStore } from '../stats'
 import { enableSubmoduleDiff } from '../feature-flag'
-import { WorkflowState } from '../../models/workflow-data'
-
 export class RepositoryStateCache {
   private readonly repositoryState = new Map<string, IRepositoryState>()
 
@@ -303,16 +301,6 @@ export class RepositoryStateCache {
 function getInitialRepositoryState(): IRepositoryState {
   return {
     commitSelection: {
-      commitWorkflow: {
-        name: '',
-        path: '',
-        state: WorkflowState.None,
-        createAt: '',
-        updateAt: '',
-        url: '',
-        htmlUrl: '',
-        badgeUrl: '',
-      },
       shas: [],
       shasInDiff: [],
       isContiguous: true,

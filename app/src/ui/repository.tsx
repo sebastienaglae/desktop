@@ -323,6 +323,7 @@ export class RepositoryView extends React.Component<
     return (
       <ActionsSidebar
         repository={repository}
+        accounts={this.props.accounts as Account[]}
         isLocalRepository={remote === null}
         compareState={compareState}
         selectedCommitShas={shas}

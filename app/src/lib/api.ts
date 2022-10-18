@@ -1185,6 +1185,27 @@ export class API {
     return null
   }
 
+  public async fetchWorkflow(
+    owner: string,
+    name: string
+  ): Promise<IAPIWorkflowJobs | null> {
+    const path = `repos/${owner}/${name}/actions/workflows`
+    const customHeaders = {
+      Accept: 'application/vnd.github.antiope-preview+json',
+    }
+    const response = await this.request('GET', path, {
+      customHeaders,
+    })
+    try {
+      return await parsedResponse<IAPIWorkflowJobs>(response)
+    } catch (err) {
+      log.debug(
+        `Failed fetching workflow jobs (${owner}/${name}) workflow run: all`
+      )
+    }
+    return null
+  }
+
   /**
    * Get JSZip for a workflow run log archive.
    *

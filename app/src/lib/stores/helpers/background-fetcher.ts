@@ -51,6 +51,7 @@ export class BackgroundFetcher {
 
   /** Start background fetching. */
   public start(withInitialSkew: boolean) {
+    console.log('Starting background fetcher')
     if (this.stopped) {
       fatalError('Cannot start a background fetcher that has been stopped.')
     }
@@ -75,6 +76,7 @@ export class BackgroundFetcher {
    * restarted.
    */
   public stop() {
+    console.log('Stopping background fetcher')
     this.stopped = true
 
     const handle = this.timeoutHandle
@@ -88,6 +90,7 @@ export class BackgroundFetcher {
   private async performAndScheduleFetch(
     repository: GitHubRepository
   ): Promise<void> {
+    console.log('Performing background fetch')
     if (this.stopped) {
       return
     }
@@ -129,6 +132,7 @@ export class BackgroundFetcher {
   private async getFetchInterval(
     repository: GitHubRepository
   ): Promise<number> {
+    console.log('Getting fetch interval')
     const api = API.fromAccount(this.account)
 
     let interval = DefaultFetchInterval

@@ -47,7 +47,6 @@ import {
   MultiCommitOperationStep,
 } from '../models/multi-commit-operation'
 import { IChangesetData } from './git'
-import { WorkflowData } from '../models/workflow-data'
 
 export enum SelectionType {
   Repository,
@@ -581,7 +580,6 @@ export interface IBranchesState {
 }
 
 export interface ICommitSelection {
-  readonly commitWorkflow: WorkflowData | null
   /** The commits currently selected in the app */
   readonly shas: ReadonlyArray<string>
 

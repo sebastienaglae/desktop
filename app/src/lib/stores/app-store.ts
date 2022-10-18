@@ -1124,16 +1124,6 @@ export class AppStore extends TypedBaseStore<IAppState> {
 
   private clearSelectedCommit(repository: Repository) {
     this.repositoryStateCache.updateCommitSelection(repository, () => ({
-      commitWorkflow: {
-        name: '',
-        path: '',
-        state: WorkflowState.None,
-        createAt: '',
-        updateAt: '',
-        url: '',
-        htmlUrl: '',
-        badgeUrl: '',
-      },
       shas: [],
       file: null,
       changesetData: { files: [], linesAdded: 0, linesDeleted: 0 },
@@ -7321,16 +7311,6 @@ export class AppStore extends TypedBaseStore<IAppState> {
       baseBranch,
       commitSHAs,
       commitSelection: {
-        commitWorkflow: {
-          name: '',
-          path: '',
-          state: WorkflowState.None,
-          createAt: '',
-          updateAt: '',
-          url: '',
-          htmlUrl: '',
-          badgeUrl: '',
-        },
         shas: commitSHAs,
         shasInDiff: commitSHAs,
         isContiguous: true,

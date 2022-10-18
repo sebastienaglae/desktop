@@ -1,3 +1,4 @@
+/* eslint-disable react-readonly-props-and-state */
 import * as React from 'react'
 
 import { Commit } from '../../models/commit'
@@ -13,9 +14,11 @@ import { ThrottledScheduler } from '../lib/throttled-scheduler'
 import { Ref } from '../lib/ref'
 import { AheadBehindStore } from '../../lib/stores/ahead-behind-store'
 import { CommitListAction } from './commit-list-actions'
+import { Account } from '../../models/account'
 
 interface IActionsSidebarProps {
   readonly repository: Repository
+  readonly accounts: Account[]
   readonly isLocalRepository: boolean
   readonly compareState: ICompareState
   readonly emoji: Map<string, string>
@@ -92,6 +95,7 @@ export class ActionsSidebar extends React.Component<
 
     return (
       <CommitListAction
+        accounts={this.props.accounts as Account[]}
         gitHubRepository={this.props.repository.gitHubRepository}
         isLocalRepository={this.props.isLocalRepository}
         commitLookup={this.props.commitLookup}
