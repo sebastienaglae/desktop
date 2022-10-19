@@ -9,7 +9,6 @@ import { DragData } from '../../models/drag-drop'
 import classNames from 'classnames'
 import { CommitListItemActions } from './commit-list-item-actions'
 import { Account } from '../../models/account'
-import { API } from '../../lib/api'
 
 const RowHeight = 50
 
@@ -273,13 +272,13 @@ export class CommitListAction extends React.Component<
         shasToHighlight !== undefined && shasToHighlight.length > 0,
     })
 
-    const account = this.props.accounts[0]
-    const api = new API(account.endpoint, account.token)
-    const result = api.fetchWorkflow(
-      this.props.gitHubRepository?.owner?.login ?? '',
-      this.props.gitHubRepository?.name ?? ''
-    )
-    console.log(result)
+    // const account = this.props.accounts[0]
+    // const api = new API(account.endpoint, account.token)
+    // const result = api.fetchWorkflow(
+    //   this.props.gitHubRepository?.owner?.login ?? '',
+    //   this.props.gitHubRepository?.name ?? ''
+    // )
+    // console.log(result)
     return (
       <div id="commit-list" className={classes}>
         <List

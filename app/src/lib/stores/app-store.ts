@@ -881,7 +881,12 @@ export class AppStore extends TypedBaseStore<IAppState> {
     if (repository.missing) {
       return { type: SelectionType.MissingRepository, repository }
     }
-
+    console.log('[INFO] getSelectedState: repository: ', repository)
+    console.log(
+      '[INFO] getSelectedState: repository: ',
+      this.repositoryStateCache.get(repository)
+    )
+    console.trace()
     return {
       type: SelectionType.Repository,
       repository,
@@ -1006,7 +1011,6 @@ export class AppStore extends TypedBaseStore<IAppState> {
           }
         }
       }
-
       return {
         tip: gitStore.tip,
         defaultBranch: gitStore.defaultBranch,
@@ -1047,9 +1051,14 @@ export class AppStore extends TypedBaseStore<IAppState> {
         stashEntry,
       }
     })
+    // Get the first commit gitStore.commitLookup
+    const firstCommit = gitStore.commitLookup.values().next().value
+    const firstCommitName = gitStore.commitLookup.keys().next().value
+    const lol = new Map<string, Commit>()
+    lol.set(firstCommitName, firstCommit)
 
     this.repositoryStateCache.update(repository, () => ({
-      commitLookup: gitStore.commitLookup,
+      commitLookup: lol,
       localCommitSHAs: gitStore.localCommitSHAs,
       localTags: gitStore.localTags,
       aheadBehind: gitStore.aheadBehind,
