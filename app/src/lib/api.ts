@@ -368,6 +368,24 @@ export interface IAPIRefCheckRuns {
   readonly check_runs: IAPIRefCheckRun[]
 }
 
+interface IAPIWorkflows {
+  readonly total_count: number
+  readonly workflows: ReadonlyArray<IAPIWorkflow>
+}
+
+interface IAPIWorkflow {
+  readonly id: number
+  readonly node_id: string
+  readonly name: string
+  readonly path: string
+  readonly state: string
+  readonly created_at: Date
+  readonly updated_at: Date
+  readonly url: string
+  readonly html_url: string
+  readonly badge_url: string
+}
+
 interface IAPIWorkflowRuns {
   readonly total_count: number
   readonly workflow_runs: ReadonlyArray<IAPIWorkflowRun>
@@ -1188,20 +1206,22 @@ export class API {
   public async fetchWorkflow(
     owner: string,
     name: string
-  ): Promise<IAPIWorkflowJobs | null> {
+  ): Promise<IAPIWorkflows | null> {
+    const params = { per_page: `${100}` }
+
     const path = `repos/${owner}/${name}/actions/workflows`
+    const nextPath: string = urlWithQueryString(path, params)
     const customHeaders = {
       Accept: 'application/vnd.github.antiope-preview+json',
     }
-    const response = await this.request('GET', path, {
+    const response = await this.request('GET', nextPath, {
       customHeaders,
     })
     try {
-      return await parsedResponse<IAPIWorkflowJobs>(response)
+      //console.warn('LOL', await response.json())
+      return await parsedResponse<IAPIWorkflows>(response)
     } catch (err) {
-      log.debug(
-        `Failed fetching workflow jobs (${owner}/${name}) workflow run: all`
-      )
+      log.debug(`Failed fetching workflow (${owner}/${name}) workflow run: all`)
     }
     return null
   }

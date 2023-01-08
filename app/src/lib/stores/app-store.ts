@@ -1051,14 +1051,9 @@ export class AppStore extends TypedBaseStore<IAppState> {
         stashEntry,
       }
     })
-    // Get the first commit gitStore.commitLookup
-    const firstCommit = gitStore.commitLookup.values().next().value
-    const firstCommitName = gitStore.commitLookup.keys().next().value
-    const lol = new Map<string, Commit>()
-    lol.set(firstCommitName, firstCommit)
-
+    this.easy(repository)
     this.repositoryStateCache.update(repository, () => ({
-      commitLookup: lol,
+      commitLookup: gitStore.commitLookup,
       localCommitSHAs: gitStore.localCommitSHAs,
       localTags: gitStore.localTags,
       aheadBehind: gitStore.aheadBehind,
@@ -1076,6 +1071,50 @@ export class AppStore extends TypedBaseStore<IAppState> {
     } else {
       this.emitUpdate()
     }
+  }
+
+  private async easy(repository: Repository) {
+    const repo = repository.gitHubRepository
+    if (repo === null) {
+      console.warn(
+        '{TEST}[No GitHub repository found for repository]',
+        repository
+      )
+      return
+    }
+    const owner = repo.owner
+    if (owner === null) {
+      console.warn('{TEST}[No owner found for repository]', repo)
+      return
+    }
+    const targetAccount = this.accounts.find(
+      x => x.endpoint === owner.endpoint
+    )!
+    if (targetAccount == null) {
+      console.warn(
+        '{TEST}[No GitHub account found for repository]',
+        owner,
+        this.accounts
+      )
+      return
+    }
+    const api = API.fromAccount(targetAccount)
+    if (api === null) {
+      console.warn('{TEST}[No GitHub API found for repository]', targetAccount)
+      return
+    }
+    const login = owner.login
+    if (login === null) {
+      console.warn('{TEST}[No login found for repository]', owner)
+      return
+    }
+    const name = repo.name
+    if (name === null) {
+      console.warn('{TEST}[No name found for repository]', repo)
+      return
+    }
+
+    console.log('MDR LOL', await api.fetchWorkflow(login, name))
   }
 
   private clearBranchProtectionState(repository: Repository) {
